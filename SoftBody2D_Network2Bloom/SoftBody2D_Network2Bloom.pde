@@ -56,7 +56,7 @@ String numParticlesText;
 DwSpringConstraint.Param param_spring = new DwSpringConstraint.Param();
 Boolean bMoveMouseParticle = false; 
 color moveNodeColor = color(0, 0, 255);
-Boolean bAddNewParticle = false;
+Boolean bAddNewNodeChain = false;
 color addNodeColor = color(255, 0, 0);
 
 ///////////////////////////////////
@@ -144,7 +144,6 @@ public void setupFXeffects() {
 
 public void draw() {
 
-  updateMouseInteractions();    
 
   // update physics simulation
   physics.update(1);
@@ -159,6 +158,9 @@ public void draw() {
   pg_render.endDraw();
 
   drawFXeffects_pg_render();
+  
+  
+  updateMouseInteractions();    
 
   // stats, to the title window
   String txt_fps = String.format(getClass().getName()+ "   [particles %d]   [frame %d]   [fps %6.2f]", particles.size(), frameCount, frameRate);
@@ -213,7 +215,7 @@ void drawNetwork() {
   for (int i = 0; i < particles.size(); i++) {
     if (bMoveMouseParticle && findId_particleMouse.id == i) {
       pg_render.fill(moveNodeColor);
-    } else if (bAddNewParticle) {
+    } else if (bAddNewNodeChain && findId_particleMouse.id == i) {
       pg_render.fill(addNodeColor);
     } else pg_render.fill(255, 255, 255);
     DwParticle2D particle = particles.get(i);
@@ -255,6 +257,14 @@ public void updateMouseInteractions() {
       particle_mouse.moveTo(mouse, 0.2f);
     }
   }
+  else if(bAddNewNodeChain){
+    if (particle_mouse != null) {
+      stroke(200, 200, 200);
+      line(particles.get(findId_particleMouse.id).cx, particles.get(findId_particleMouse.id).cy, mouseX, mouseY);
+      fill(200, 200, 200);
+      ellipse(mouseX, mouseY, 10, 10);
+    }
+  }
 }
 
 //----------------------------------------------
@@ -276,8 +286,10 @@ public void mousePressed() {
     particle_mouse.enable(false, false, false);
 
     if (mouseButton == LEFT  ) {
-
       bMoveMouseParticle = true;
+    }
+    else if(mouseButton == RIGHT){
+      bAddNewNodeChain = true;
     }
   }
 }
@@ -292,8 +304,8 @@ public void mouseReleased() {
     //if(mouseButton == CENTER) particle_mouse.enable(true, false, false);
     if (mouseButton == RIGHT) {
       addNewItemChain(particle_mouse, mouseX, mouseY, findId_particleMouse);
+      bAddNewNodeChain = false;
     }
-
 
     particle_mouse = null;
   }
