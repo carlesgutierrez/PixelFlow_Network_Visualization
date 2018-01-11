@@ -7,16 +7,21 @@
  * 
  */
 
+/**
+ *
+ * Network Chain Example
+ * Carles Gutierrez
+ * http://carlesgutierrez.github.io
+ */
+
 import java.util.ArrayList;
 
-import com.thomasdiewald.pixelflow.java.DwPixelFlow;
-
+import com.thomasdiewald.pixelflow.java.DwPixelFlow;//Pixel Flow required
 import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwFilter;//Bloom required
-
-import com.thomasdiewald.pixelflow.java.softbodydynamics.DwPhysics;
-import com.thomasdiewald.pixelflow.java.softbodydynamics.constraint.DwSpringConstraint;
-import com.thomasdiewald.pixelflow.java.softbodydynamics.constraint.DwSpringConstraint2D;
-import com.thomasdiewald.pixelflow.java.softbodydynamics.particle.DwParticle2D;
+import com.thomasdiewald.pixelflow.java.softbodydynamics.DwPhysics;//General Physics required
+import com.thomasdiewald.pixelflow.java.softbodydynamics.constraint.DwSpringConstraint;//Chain Physics required
+import com.thomasdiewald.pixelflow.java.softbodydynamics.constraint.DwSpringConstraint2D;//Chain Physics required
+import com.thomasdiewald.pixelflow.java.softbodydynamics.particle.DwParticle2D;//Physics required to get and modify exiting nodes
 
 import processing.core.*;
 
@@ -24,7 +29,8 @@ import processing.core.*;
 // Getting started with verlet particles/softbody simulation.
 // 
 // + Collision Detection
-//
+// + Network Chain Generation
+// + Bloom FX effect
 
 int viewport_w = 1280;
 int viewport_h = 720;
@@ -37,32 +43,42 @@ DwPhysics.Param param_physics = new DwPhysics.Param();
 // physics simulation
 DwPhysics<DwParticle2D> physics;
 
-//DwParticle2D[] particles = new DwParticle2D[int(random(3, 10))];
-
-//Modified values
+//Nodes ( particles ) as an Array of the NodeVA class
 ArrayList<NodeVA> particles = new ArrayList<NodeVA>();
-DwParticle2D.Param param_particle;
-//NodeVA[] particles = new NodeVA[int(random(3, 10))];
 
+//Param_particle Used to set particular properties to each particle
+DwParticle2D.Param param_particle;
+
+//Interger Used to assign next Node to add a Particle in the Network
 vaID findId_particleMouse = new vaID(0);
+//vaID modifyId_particleMouse = new vaID(0);
 String numParticlesText;
 DwSpringConstraint.Param param_spring = new DwSpringConstraint.Param();
-Boolean bMoveMouseParticle = false;
+Boolean bMoveMouseParticle = false; 
+color moveNodeColor = color(0, 0, 255);
+Boolean bAddNewParticle = false;
+color addNodeColor = color(255, 0, 0);
 
 ///////////////////////////////////
-//FX Effects
-// render targets
+//FX Effects and render variables
 PGraphics2D pg_render;
 PGraphics2D pg_bloom;
-// pixelflow context
 DwPixelFlow context;
 DwFilter filter;
 
+float minNodeSize = 5;
+float maxNodeSize = 10;
+
+////////////////////////////////////////////////////
+//Code
+
+//-------------------------------------------
 public void settings() {
   size(viewport_w, viewport_h, P2D); 
   smooth(8);
 }
 
+//-------------------------------------------
 public void setup() {
 
   println(numParticlesText);
@@ -133,12 +149,9 @@ public void draw() {
   // update physics simulation
   physics.update(1);
 
-  // render
-  //background(255);
-
   pg_render.beginDraw();
   pg_render.noStroke();
-  //pg_render.fill(255, 96); // no idea what do this if afeter background is 0
+  //pg_render.fill(255, 96); //seems to be not necesary
   //pg_render.rect(0, 0, width, height);
 
   pg_render.background(0);
@@ -186,7 +199,7 @@ void drawNetwork() {
       float r = force*5000f;
       float g = r/10;
       float b = 0;
-      pg_render.stroke(200-r, 200-g, 200-b);
+      pg_render.stroke(200-r, 200-g, 200-b); //small color modif to show chaing color in a black background
       pg_render.vertex(pa.cx, pa.cy);
       pg_render.vertex(pb.cx, pb.cy);
     }
@@ -196,8 +209,13 @@ void drawNetwork() {
 
   // render particles
   pg_render.noStroke();
-  pg_render.fill(255, 255, 255);
+
   for (int i = 0; i < particles.size(); i++) {
+    if (bMoveMouseParticle && findId_particleMouse.id == i) {
+      pg_render.fill(moveNodeColor);
+    } else if (bAddNewParticle) {
+      pg_render.fill(addNodeColor);
+    } else pg_render.fill(255, 255, 255);
     DwParticle2D particle = particles.get(i);
     pg_render.ellipse(particle.cx, particle.cy, particle.rad*2, particle.rad*2);
   }
@@ -256,7 +274,7 @@ public void mousePressed() {
   particle_mouse = findNearestParticle(mouseX, mouseY, 100, findId_particleMouse);
   if (particle_mouse != null) {
     particle_mouse.enable(false, false, false);
-    
+
     if (mouseButton == LEFT  ) {
 
       bMoveMouseParticle = true;
@@ -267,7 +285,7 @@ public void mousePressed() {
 public void mouseReleased() {
   if (particle_mouse != null) {
     particle_mouse.enable(true, true, true);
-    
+
     if (mouseButton == LEFT  ) {
       bMoveMouseParticle = false;
     }
@@ -283,10 +301,10 @@ public void mouseReleased() {
 
 //------------------------------------------------
 public void newRandomChainItems() {
-  int numRandomParticles = int(random(2, 10));
+  int numRandomParticles = int(random(5, 10));
   // create particles + chain them together
   for (int i = 0; i < numRandomParticles; i++) {
-    float radius = random(10, 45);
+    float radius = random(minNodeSize, maxNodeSize);
     float px = width/2;
     float py = 100 + i * radius * 3;
     //particles[i] = new DwParticle2D(i, px, py, radius, param_particle);
@@ -312,7 +330,7 @@ public void addNewItemChain(DwParticle2D _prevItem, int _px, int _py, vaID _find
   if (particle_mouse != null) {
     //Add one circle to this particle
     int id_LastNodeToAdd = _findId.id;//particles.size()-1;
-    float radius = random(30, 40);
+    float radius = random(minNodeSize, maxNodeSize);
     float px = _px+random(-10, 10);
     float py = _py+random(-10, 10);//100 + int(particles[0].getShape().getVertexY(0));
     NodeVA auxParticle = new NodeVA(particles.size(), px, py, radius, param_particle, 0, 0); //TODO modify 0,0 to real values... 
