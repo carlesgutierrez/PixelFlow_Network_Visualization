@@ -12,7 +12,7 @@ DwPixelFlow context;
 ///////
 //SemiTransParent Background Contend
 Boolean bBackgroundAlpha = true;
-int alphaBk = 250;
+//int alphaBk = 250;
 
 ///////
 int viewport_w = 1280;//2560;//
@@ -36,8 +36,8 @@ import controlP5.*;
 ControlP5 cp5;
 float sliderBloomMult = 0;
 float sliderBloomRadius = 0;
-int sliderAlphaBackground = 0;
-
+int sliderAlphaBackground = 250;
+Boolean bGuiHide = false;
 
 ///////
 //-------------------------------------------
@@ -121,6 +121,11 @@ public void keyPressed() {
 public void keyReleased() {
   if (key == 's') {
     bRecordScreen = false;
+  }
+  if(key == 'h'){
+    bGuiHide = ! bGuiHide;
+    if(bGuiHide)cp5.hide();
+    else cp5.show();
   }
 
   myPixFlowNet.keyReleased();
