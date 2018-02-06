@@ -10,6 +10,7 @@ EditablePixFlowNetwork myPixFlowNet;
 DwPixelFlow context;
 
 ///////
+//SemiTransParent Background Contend
 Boolean bBackgroundAlpha = true;
 int alphaBk = 250;
 
@@ -29,6 +30,14 @@ int minResetInitNodes = 10;
 int maxResetInitNodes = 15;
 Boolean bdrawForcesColor = false;
 
+//////
+//Gui
+import controlP5.*;
+ControlP5 cp5;
+float sliderBloomMult = 0;
+float sliderBloomRadius = 0;
+int sliderAlphaBackground = 0;
+
 
 ///////
 //-------------------------------------------
@@ -45,11 +54,11 @@ public void setup() {
   context.print();
   context.printGL();
 
-  //set this windows somewhere in your screen
-  //surface.setLocation(viewport_x, viewport_y);
-
   myPixFlowNet = new EditablePixFlowNetwork(this, width, height);
   myPixFlowNet.setup();
+
+  //Gui
+  setupGui();
 
   frameRate(60);
 }
@@ -57,13 +66,6 @@ public void setup() {
 
 //-------------------------------------------
 public void draw() {
-
-  //background(8);
-    //if (bBackgroundAlpha) {
-    //  fill(0, 0, 0, alphaBk);
-    //  rectMode(CORNER);
-    //  rect(0, 0, width, height);
-    //} else background(0, 0, 0);
 
   // draw particlesystem
   myPixFlowNet.draw();
@@ -73,12 +75,12 @@ public void draw() {
 
   //Draw compositions 
   image(myPixFlowNet.pg_render, 0, 0);
-  
+
   //Draw Interactions Outside FX effects
   myPixFlowNet.drawMouseInteraction();
 
   if (bRecordScreen) {
-    //thread("recordFrame");
+    //TODO add a timer to avoid to save all frames
     recordFrame();
   }
 }
@@ -88,8 +90,8 @@ public void drawFXeffects_pg_render() {
   DwFilter filter = DwFilter.get(context);
   //filter.bloom.param.mult   = 1.0f;
   //filter.bloom.param.radius = 1;
-  filter.bloom.param.mult   = map(mouseX, 0, width, 0, 2);
-  filter.bloom.param.radius = map(mouseY, 0, height, 0, 1);
+  filter.bloom.param.mult   = sliderBloomMult;//map(mouseX, 0, width, 0, 2);
+  filter.bloom.param.radius = sliderBloomRadius;//map(mouseY, 0, height, 0, 1);
 
   filter.luminance_threshold.param.threshold = 0.3f;
   filter.luminance_threshold.param.exponent = 10;
@@ -110,10 +112,10 @@ public void keyPressed() {
     bRecordScreen = true;
   }
 
-  if (keyCode == LEFT)alphaBk += 10; 
-  if (alphaBk>255) alphaBk = 255;
-  if (keyCode == RIGHT)alphaBk -= 10; 
-  if (alphaBk<1) alphaBk = 1;
+  //if (keyCode == LEFT)alphaBk += 10; 
+  //if (alphaBk>255) alphaBk = 255;
+  //if (keyCode == RIGHT)alphaBk -= 10; 
+  //if (alphaBk<1) alphaBk = 1;
 }
 //--------------------------------------------
 public void keyReleased() {
@@ -130,4 +132,35 @@ public void mousePressed() {
 
 public void mouseReleased() {
   myPixFlowNet.mouseReleased();
+}
+
+//----------------------------------------
+void setupGui() {
+  ////////////////////////////////
+  //GUi
+  cp5 = new ControlP5(this);
+  int initPosX = 10;
+  int initPosY = 10;
+  int gapY = 20; 
+  int numItemGui = 0;
+  // add a horizontal sliders, the value of this slider will be linked
+  // to variable 'sliderValue' 
+  cp5.addSlider("sliderBloomMult")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    .setRange(0, 2)
+    ;
+
+  numItemGui++;
+
+  cp5.addSlider("sliderBloomRadius")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    .setRange(0, 1)
+    ;
+  numItemGui++;
+
+  cp5.addSlider("sliderAlphaBackground")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    .setRange(0, 255)
+    ;
+  numItemGui++;
 }

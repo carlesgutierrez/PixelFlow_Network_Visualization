@@ -1,4 +1,4 @@
-//<>// //<>// //<>//
+//<>// //<>// //<>// //<>//
 /**
  * 
  * PixelFlow | Copyright (C) 2016 Thomas Diewald - http://thomasdiewald.com
@@ -164,6 +164,7 @@ class EditablePixFlowNetwork {
     //pg_render.background(0);
     //Alpha Smoothing Drawings
     if (bBackgroundAlpha) {
+      alphaBk = sliderAlphaBackground;
       pg_render.fill(0, 0, 0, alphaBk);
       pg_render.rectMode(CORNER);
       pg_render.rect(0, 0, width, height);
