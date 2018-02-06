@@ -1,4 +1,4 @@
-//<>// //<>//
+//<>// //<>// //<>//
 /**
  * 
  * PixelFlow | Copyright (C) 2016 Thomas Diewald - http://thomasdiewald.com
@@ -29,6 +29,10 @@ import processing.core.*;
 
 //Nodes ( particles ) as an Array of the NodeVA class
 ArrayList<NodeVA> particles = new ArrayList<NodeVA>();
+Boolean bMoreStaticPhysics = false;
+float dampBounds;
+float dampCollision;
+float dampVelocity;
 
 class EditablePixFlowNetwork {
 
@@ -46,7 +50,8 @@ class EditablePixFlowNetwork {
   DwParticle2D.Param param_particle;
 
   //Interger Used to assign next Node to add a Particle in the Network
-  vaID findId_particleMouse = new vaID(0);
+  vaID findId_particleMouse_pressed = new vaID(0);
+  vaID findId_particleMouse_released = new vaID(0);
   //vaID modifyId_particleMouse = new vaID(0);
   String numParticlesText = " ";
   DwSpringConstraint.Param param_spring = new DwSpringConstraint.Param();
@@ -59,14 +64,12 @@ class EditablePixFlowNetwork {
   //FX Effects and render variables
   PGraphics2D pg_render;
   PGraphics2D pg_bloom;
-
   DwFilter filter;
 
-
-
   ////////////////////////////////////////////////////
-  //Code
 
+  //-------------------------------------------
+  //Constructor
   public EditablePixFlowNetwork(PApplet papplet, int size_x, int size_y) {
     this.papplet = papplet;
 
@@ -101,9 +104,10 @@ class EditablePixFlowNetwork {
 
     // particle parameters
     DwParticle2D.Param param_particle = new DwParticle2D.Param();
-    param_particle.DAMP_BOUNDS          = 0.50f;
-    param_particle.DAMP_COLLISION       = 0.9990f;
-    param_particle.DAMP_VELOCITY        = 0.9999991f; 
+    param_particle.DAMP_BOUNDS = dampBounds       = 0.50f;
+    param_particle.DAMP_COLLISION = dampCollision = 0.9990f;
+    param_particle.DAMP_VELOCITY = dampVelocity   = 0.9999991f; 
+    println(param_particle.DAMP_BOUNDS, param_particle.DAMP_COLLISION, param_particle.DAMP_VELOCITY);
 
     // spring parameters
     //DwSpringConstraint.Param param_spring = new DwSpringConstraint.Param();
@@ -116,7 +120,6 @@ class EditablePixFlowNetwork {
   //-------------------------------------------
   public void setupFXeffects() {
 
-
     filter = new DwFilter(context);
 
     // render targets
@@ -127,23 +130,27 @@ class EditablePixFlowNetwork {
     pg_render.smooth(8);
 
     pg_render.beginDraw();
-    pg_render.background(0); //8);
+    pg_render.background(0); //just once
     pg_render.endDraw();
   }
 
-//---------------------------
+  //---------------------------
   public void drawMouseInteraction() {
     if (bAddNewNodeChain) {
-      if (particle_mouse != null) {
-        pg_render.stroke(200, 200, 200);
-        pg_render.line(particles.get(findId_particleMouse.id).cx, particles.get(findId_particleMouse.id).cy, mouseX, mouseY);
-        pg_render.fill(200, 200, 200);
-        pg_render.ellipse(mouseX, mouseY, 10, 10);
+      if (particle_mouse_pressed != null) {
+        //pg_render.
+        stroke(200, 200, 200);
+        //pg_render.
+        line(particles.get(findId_particleMouse_pressed.id).cx, particles.get(findId_particleMouse_pressed.id).cy, mouseX, mouseY);
+        //pg_render.
+        fill(200, 200, 200);
+        //pg_render.
+        ellipse(mouseX, mouseY, 10, 10);
       }
     }
   }
 
-//---------------------------
+  //---------------------------
   public void draw() {
 
     // update physics simulation
@@ -154,14 +161,16 @@ class EditablePixFlowNetwork {
     //pg_render.fill(255, 96); //seems to be not necesary
     //pg_render.rect(0, 0, width, height);
 
-    pg_render.background(0);
+    //pg_render.background(0);
+    //Alpha Smoothing Drawings
+    if (bBackgroundAlpha) {
+      pg_render.fill(0, 0, 0, alphaBk);
+      pg_render.rectMode(CORNER);
+      pg_render.rect(0, 0, width, height);
+    } else pg_render.background(0, 0, 0);
+
     drawNetwork();
-
-    drawMouseInteraction();
-
-
     pg_render.endDraw();
-
 
     updateMouseInteractions();    
 
@@ -205,9 +214,9 @@ class EditablePixFlowNetwork {
     pg_render.noStroke();
 
     for (int i = 0; i < particles.size(); i++) {
-      if (bMoveMouseParticle && findId_particleMouse.id == i) {
+      if (bMoveMouseParticle && findId_particleMouse_pressed.id == i) {
         pg_render.fill(moveNodeColor);
-      } else if (bAddNewNodeChain && findId_particleMouse.id == i) {
+      } else if (bAddNewNodeChain && findId_particleMouse_pressed.id == i) {
         pg_render.fill(addNodeColor);
       } else pg_render.fill(defaultColorNode);
       DwParticle2D particle = particles.get(i);
@@ -222,7 +231,8 @@ class EditablePixFlowNetwork {
   // User Interaction
   //////////////////////////////////////////////////////////////////////////////
 
-  DwParticle2D particle_mouse = null;
+  DwParticle2D particle_mouse_pressed = null;
+  DwParticle2D particle_mouse_released = null;
 
   public DwParticle2D findNearestParticle(float mx, float my, float search_radius, vaID indexParticle) {
     float dd_min_sq = search_radius * search_radius;
@@ -244,9 +254,9 @@ class EditablePixFlowNetwork {
   //--------------------------------------------
   public void updateMouseInteractions() {
     if (bMoveMouseParticle) {
-      if (particle_mouse != null) {
+      if (particle_mouse_pressed != null) {
         float[] mouse = {mouseX, mouseY};
-        particle_mouse.moveTo(mouse, 0.2f);
+        particle_mouse_pressed.moveTo(mouse, 0.2f);
       }
     }
   }
@@ -257,17 +267,59 @@ class EditablePixFlowNetwork {
     physics.reset(); //Reset ALL. Better use setParticles with a new size?
     newRandomChainItems();
   }
+
+  //--------------------------------------
+  public void addSpringBetweenParticles(vaID _id0, vaID _id1) {
+
+    if (particles.size() > _id1.id && particles.size() > _id0.id) { //saved acces to arrayList
+      DwSpringConstraint2D.addSpring(physics, particles.get(_id0.id), particles.get(_id1.id), param_spring);
+    }
+  }
+
+  //--------------------------------------
+  public void setupNextParamParticles(float _dampBounds, float _dampCollision, float _dampVelocity) {
+
+    param_particle = new DwParticle2D.Param();
+    param_particle.DAMP_BOUNDS          = _dampBounds;
+    param_particle.DAMP_COLLISION       = _dampCollision;
+    param_particle.DAMP_VELOCITY        = _dampVelocity; 
+    println(param_particle.DAMP_BOUNDS, param_particle.DAMP_COLLISION, param_particle.DAMP_VELOCITY);
+
+    // Reset All Them?
+    for (int i = 0; i < particles.size(); i++) { // This work if they are the only ones. Not others like softbodies
+
+      particles.get(i).updateParamByRef(param_particle);
+      //if (i > 0) DwSpringConstraint2D.addSpring(physics, particles.get(i-1), particles.get(i), param_spring);
+    }
+  }
   //--------------------------------------------
   public void keyReleased() {
     if (key == 'r') reset();
+    else if (key == 'p') {
+      bMoreStaticPhysics = !bMoreStaticPhysics;
+      if (bMoreStaticPhysics) {
+        //More Statics values particle parameters
+        dampBounds = 0.80f;
+        dampCollision = 0.99f;
+        dampVelocity = 0.51f;
+      } else {
+
+        dampBounds = 0.50f;
+        dampCollision = 0.9990f;
+        dampVelocity = 0.9999991f;
+      }
+
+      setupNextParamParticles(dampBounds, dampCollision, dampVelocity);
+    }
     //if (key == 'p') DISPLAY_PARTICLES = !DISPLAY_PARTICLES;
   }
 
   public void mousePressed() {
 
-    particle_mouse = findNearestParticle(mouseX, mouseY, 100, findId_particleMouse);
-    if (particle_mouse != null) {
-      particle_mouse.enable(false, false, false);
+    particle_mouse_released = null;//reset
+    particle_mouse_pressed = findNearestParticle(mouseX, mouseY, 100, findId_particleMouse_pressed);
+    if (particle_mouse_pressed != null) {
+      particle_mouse_pressed.enable(false, false, false);
 
       if (mouseButton == LEFT  ) {
         bMoveMouseParticle = true;
@@ -278,21 +330,33 @@ class EditablePixFlowNetwork {
   }
 
   public void mouseReleased() {
-    if (particle_mouse != null) {
-      particle_mouse.enable(true, true, true);
 
+    particle_mouse_released = findNearestParticle(mouseX, mouseY, 25, findId_particleMouse_released);
+
+
+    if (particle_mouse_pressed != null) {
+      particle_mouse_pressed.enable(true, true, true); //Reset full status physics
       if (mouseButton == LEFT  ) {
         bMoveMouseParticle = false;
       }
-      //if(mouseButton == CENTER) particle_mouse.enable(true, false, false);
-      if (mouseButton == RIGHT) {
-        addNewItemChain(particle_mouse, mouseX, mouseY, findId_particleMouse);
-        bAddNewNodeChain = false;
-      }
 
-      particle_mouse = null;
+      if (particle_mouse_released == null) { // There were NOT another node
+        if (mouseButton == RIGHT) { // and Right Mouse Interaction
+          addNewItemChain(particle_mouse_pressed, mouseX, mouseY, findId_particleMouse_pressed);
+          bAddNewNodeChain = false;
+        }
+      } else {
+        //Do others things. If you wanna do something else here
+        //TODO find the right IDs to add here
+         addSpringBetweenParticles(findId_particleMouse_pressed, findId_particleMouse_released);
+      }
     }
+
+    //reset 
+    particle_mouse_released = null;
+    particle_mouse_pressed = null;
   }
+
 
   //------------------------------------------------
   public void newRandomChainItems() {
@@ -315,14 +379,9 @@ class EditablePixFlowNetwork {
 
   //----------------------------------------------
   public void addNewItemChain(DwParticle2D _prevItem, int _px, int _py, vaID _findId) {
-    // particle parameters
-    param_particle = new DwParticle2D.Param();
-    param_particle.DAMP_BOUNDS          = random(0.80f, 0.9999991f);
-    param_particle.DAMP_COLLISION       = random(0.99f, 0.9999991f);
-    param_particle.DAMP_VELOCITY        = random(0.51f, 0.9999991f); 
-    println(param_particle.DAMP_BOUNDS, param_particle.DAMP_COLLISION, param_particle.DAMP_VELOCITY);
 
-    if (particle_mouse != null) {
+
+    if (particle_mouse_pressed != null) {
       //Add one circle to this particle
       int id_LastNodeToAdd = _findId.id;//particles.size()-1;
       float radius = random(minNodeSize, maxNodeSize);

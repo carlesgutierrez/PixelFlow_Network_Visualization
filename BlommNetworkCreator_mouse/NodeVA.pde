@@ -11,6 +11,10 @@ class NodeVA extends DwParticle2D {
     id0 = _id0;
     id1 = _id1;
   }
+  
+  void updateParamByRef(DwParticle2D.Param _param_particle){
+    setParamByRef(_param_particle);
+  }
 
   /*
   NodeVA (int _id0, int _id1) {  
