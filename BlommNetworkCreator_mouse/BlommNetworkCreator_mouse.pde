@@ -147,7 +147,14 @@ void setupGui() {
   int initPosX = 10;
   int initPosY = 10;
   int gapY = 20; 
+  int gapYColorPicker = 100;
   int numItemGui = 0;
+  
+  cp5.addColorWheel("defaultColorLines" , width-gapYColorPicker, initPosY + gapYColorPicker*numItemGui , gapYColorPicker).setRGB(color(128,0,255));
+  numItemGui++;
+  cp5.addColorWheel("defaultColorNode" , width-gapYColorPicker, initPosY + gapYColorPicker*numItemGui , gapYColorPicker).setRGB(color(128,0,255));
+  numItemGui++;
+  
   // add a horizontal sliders, the value of this slider will be linked
   // to variable 'sliderValue' 
   cp5.addSlider("slider_BloomMult")
