@@ -84,6 +84,7 @@ void print_ArteDeRobar_TablesContent() {
 
 //-------------------------------------
 void createNetwork_ArteDeRobar(){
+  myPixFlowNet.reset();
   
   HashMap<String, Integer> hm_AuxEdges = new HashMap<String, Integer>();
   
@@ -95,23 +96,39 @@ void createNetwork_ArteDeRobar(){
    
     //exist SOURCE?
     Boolean foundSource = hm_AuxEdges.containsKey(source_edges);
+    Boolean foundTarget = hm_AuxEdges.containsKey(target_edges);
+
         if(foundSource == false){
-          //ifnot --> Add it into HastMap 
+          //Add it into HastMap 
           hm_AuxEdges.put(source_edges, counterAuxEdges);
-          //and Create Node "SOURCE"
-          //TODO
-          
+          if(foundTarget == false){
+            //There were nobody Create Node "SOURCE" and Link them
+            myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));
+            myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));
+            //myPixFlowNet.addNewItemChain(,,,)
+          }
+          else{
+            //just Create Node "SOURCE"
+            myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));
+            //TODO link it to the TARGET that already exist
+          }
         }else{ //ifYes
           //exist TARGET?
-          Boolean foundTarget = hm_AuxEdges.containsKey(target_edges);
           if(foundTarget == true){
             //ifYes --> Link both. From TARGET to SOURCE.
-            //TODO
+              //Find Id Targe and Id Source from physics system
+            //?
+            //myPixFlowNet.addSpringBetweenParticles(vaID _id0, vaID _id1)
           }else{
              //ifnot --> Add TARGET into same HastMap 
              hm_AuxEdges.put(target_edges, counterAuxEdges);
-             //and Create Node "SOURCE"
+             //and Create Node "TARGET"
              //TODO
+             //?
+             myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));
+             //And Linkit to SOURCE
+             //addSpringBetweenParticles(vaID _id0, vaID _id1)
+
           }
                         
         }

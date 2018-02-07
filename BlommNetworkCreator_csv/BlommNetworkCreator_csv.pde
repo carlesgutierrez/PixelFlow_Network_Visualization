@@ -127,6 +127,7 @@ public void keyReleased() {
   }
   if(key == 'p'){
     print_ArteDeRobar_HastMap();
+    createNetwork_ArteDeRobar();
     //print_ArteDeRobar_TablesContent(); //Atention --> Only works for ArteDeRobar csv's
   }
 
