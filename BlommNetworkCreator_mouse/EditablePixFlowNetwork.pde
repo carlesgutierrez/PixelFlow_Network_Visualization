@@ -197,7 +197,7 @@ class EditablePixFlowNetwork {
     //Alpha Smoothing Drawings
     if (bBackgroundAlpha) {
       //alphaBk = sliderAlphaBackground;
-      pg_render.fill(0, 0, 0, sliderAlphaBackground);
+      pg_render.fill(0, 0, 0, slider_AlphaBackground);
       pg_render.rectMode(CORNER);
       pg_render.rect(0, 0, width, height);
     } else pg_render.background(0, 0, 0);
@@ -409,7 +409,6 @@ class EditablePixFlowNetwork {
       if (particle_mouse_released == null) { // There were NOT another node
         if (mouseButton == RIGHT) { // and Right Mouse Interaction
           addNewItemChain(particle_mouse_pressed, mouseX, mouseY, findId_particleMouse_pressed);
-          bAddNewNodeChain = false;
         }
       } else { // if item released
         //Add new spring between pressed and released
@@ -431,6 +430,7 @@ class EditablePixFlowNetwork {
     }
 
     if (mouseButton == RIGHT ) DELETE_SPRINGS = false;
+    bAddNewNodeChain = false;
 
     //reset 
     particle_mouse_released = null;

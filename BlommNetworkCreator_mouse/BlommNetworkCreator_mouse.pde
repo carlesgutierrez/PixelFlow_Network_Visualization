@@ -33,11 +33,11 @@ Boolean bdrawForcesColor = false;
 //Gui
 import controlP5.*;
 ControlP5 cp5;
-float sliderBloomMult = 0;
-float sliderBloomRadius = 0;
-int sliderLuminanceExponent = 10;
-float sliderLuminanceThreshold = 0.3f;
-int sliderAlphaBackground = 250;
+float slider_BloomMult = 0;
+float slider_BloomRadius = 0;
+int slider_LuminanceExponent = 10;
+float slider_LuminanceThreshold = 0.3f;
+int slider_AlphaBackground = 250;
 Boolean bGuiHide = false;
 
 ///////
@@ -90,12 +90,12 @@ public void draw() {
 public void drawFXeffects_pg_render() {
   DwFilter filter = DwFilter.get(context);
 
-  filter.luminance_threshold.param.threshold = sliderLuminanceThreshold; //0.3f;
-  filter.luminance_threshold.param.exponent = sliderLuminanceExponent; //10;
+  filter.luminance_threshold.param.threshold = slider_LuminanceThreshold; //0.3f;
+  filter.luminance_threshold.param.exponent = slider_LuminanceExponent; //10;
   filter.luminance_threshold.apply(myPixFlowNet.pg_render, myPixFlowNet.pg_luminance);
   
-  filter.bloom.param.mult   = sliderBloomMult;//map(mouseX, 0, width, 0, 2);
-  filter.bloom.param.radius = sliderBloomRadius;//map(mouseY, 0, height, 0, 1);
+  filter.bloom.param.mult   = slider_BloomMult;//map(mouseX, 0, width, 0, 2);
+  filter.bloom.param.radius = slider_BloomRadius;//map(mouseY, 0, height, 0, 1);
 
   filter.bloom.apply(myPixFlowNet.pg_luminance, myPixFlowNet.pg_bloom, myPixFlowNet.pg_render);
   blendMode(REPLACE);
@@ -150,32 +150,32 @@ void setupGui() {
   int numItemGui = 0;
   // add a horizontal sliders, the value of this slider will be linked
   // to variable 'sliderValue' 
-  cp5.addSlider("sliderBloomMult")
+  cp5.addSlider("slider_BloomMult")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
     .setRange(0, 2)
     ;
 
   numItemGui++;
 
-  cp5.addSlider("sliderBloomRadius")
+  cp5.addSlider("slider_BloomRadius")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
     .setRange(0, 1)
     ;
   numItemGui++;
 
-  cp5.addSlider("sliderAlphaBackground")
+  cp5.addSlider("slider_AlphaBackground")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
     .setRange(0, 255)
     ;
   numItemGui++;
   
-    cp5.addSlider("sliderLuminanceThreshold")
+    cp5.addSlider("slider_LuminanceThreshold")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
     .setRange(0, 1)
     ;
   numItemGui++;
   
-    cp5.addSlider("sliderLuminanceExponent")
+    cp5.addSlider("slider_LuminanceExponent")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
     .setRange(0, 30)
     ;
