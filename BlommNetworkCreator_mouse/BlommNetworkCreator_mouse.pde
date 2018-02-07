@@ -35,6 +35,8 @@ import controlP5.*;
 ControlP5 cp5;
 float sliderBloomMult = 0;
 float sliderBloomRadius = 0;
+int sliderLuminanceExponent = 10;
+float sliderLuminanceThreshold = 0.3f;
 int sliderAlphaBackground = 250;
 Boolean bGuiHide = false;
 
@@ -87,15 +89,15 @@ public void draw() {
 //-----------------------------------------------------------
 public void drawFXeffects_pg_render() {
   DwFilter filter = DwFilter.get(context);
-  //filter.bloom.param.mult   = 1.0f;
-  //filter.bloom.param.radius = 1;
+
+  filter.luminance_threshold.param.threshold = sliderLuminanceThreshold; //0.3f;
+  filter.luminance_threshold.param.exponent = sliderLuminanceExponent; //10;
+  filter.luminance_threshold.apply(myPixFlowNet.pg_render, myPixFlowNet.pg_luminance);
+  
   filter.bloom.param.mult   = sliderBloomMult;//map(mouseX, 0, width, 0, 2);
   filter.bloom.param.radius = sliderBloomRadius;//map(mouseY, 0, height, 0, 1);
 
-  filter.luminance_threshold.param.threshold = 0.3f;
-  filter.luminance_threshold.param.exponent = 10;
-  //filter.luminance_threshold.apply(pg_src_A, pg_src_B);
-  filter.bloom.apply(myPixFlowNet.pg_render, myPixFlowNet.pg_bloom, myPixFlowNet.pg_render);
+  filter.bloom.apply(myPixFlowNet.pg_luminance, myPixFlowNet.pg_bloom, myPixFlowNet.pg_render);
   blendMode(REPLACE);
   background(0);
 }
@@ -164,6 +166,18 @@ void setupGui() {
   cp5.addSlider("sliderAlphaBackground")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
     .setRange(0, 255)
+    ;
+  numItemGui++;
+  
+    cp5.addSlider("sliderLuminanceThreshold")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    .setRange(0, 1)
+    ;
+  numItemGui++;
+  
+    cp5.addSlider("sliderLuminanceExponent")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    .setRange(0, 30)
     ;
   numItemGui++;
 }

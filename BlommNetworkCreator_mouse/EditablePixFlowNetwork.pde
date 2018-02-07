@@ -72,6 +72,7 @@ class EditablePixFlowNetwork {
   ///////////////////////////////////
   //FX Effects and render variables
   PGraphics2D pg_render;
+  PGraphics2D pg_luminance;
   PGraphics2D pg_bloom;
   DwFilter filter;
 
@@ -137,6 +138,9 @@ class EditablePixFlowNetwork {
 
     pg_render = (PGraphics2D) createGraphics(size_x, size_y, P2D);
     pg_render.smooth(8);
+
+    pg_luminance = (PGraphics2D) createGraphics(size_x, size_y, P2D);
+    pg_luminance.smooth(8);
 
     pg_render.beginDraw();
     pg_render.background(0); //just once
@@ -424,7 +428,6 @@ class EditablePixFlowNetwork {
           addNewItemCollision(mouseX, mouseY);
         }
       }
-
     }
 
     if (mouseButton == RIGHT ) DELETE_SPRINGS = false;
