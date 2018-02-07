@@ -126,7 +126,8 @@ public void keyReleased() {
     else cp5.show();
   }
   if(key == 'p'){
-    print_ArteDeRobar_TablesContent(); //Atention --> Only works for ArteDeRobar csv's
+    print_ArteDeRobar_HastMap();
+    //print_ArteDeRobar_TablesContent(); //Atention --> Only works for ArteDeRobar csv's
   }
 
   myPixFlowNet.keyReleased();
