@@ -44,6 +44,15 @@ void print_ArteDeRobar_HastMap() {
     print(me.getKey() + " is ");
     println(me.getValue());
   }
+  
+  int val = hm_targets.get("VB1D4mdJri0");
+  print("Tests\n Looking for VB1D4mdJri0 -->");
+  println(val);
+  
+  Boolean found = hm_targets.containsKey("VB1D4mdJri0");
+  print("exist VB1D4mdJri0 ? -->");
+  println(found);
+  
 }
 
 //------------------------------------
@@ -71,4 +80,17 @@ void print_ArteDeRobar_TablesContent() {
 
     println("Edges id["+id_edges+"]: Source["+source_edges+"] -> target["+target_edges+"] // type ["+type_edges+"]");
   }
+}
+
+//-------------------------------------
+void createNetwork_ArteDeRobar(){
+  
+  //For each item of the Edges
+
+    //Check if exist SOURCE 
+        //ifnot --> Create Node "SOURCE"
+        //ifYes
+            //Check if exist TARGET
+                //ifYes --> Link both. From TARGET to SOURCE.
+                //ifNot --> Create Node "TARGET"
 }
