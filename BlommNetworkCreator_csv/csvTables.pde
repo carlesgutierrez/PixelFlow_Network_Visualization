@@ -7,7 +7,7 @@ Table table_edges;
 
 // Note the HashMap's "key" is a String and "value" is an Integer
 HashMap<String, Integer> hm_targets = new HashMap<String, Integer>();
-HashMap<String, Integer> hm_edges = new HashMap<String, Integer>();
+
 
 //------------------------------------
 void setupHashTables() {
@@ -85,12 +85,39 @@ void print_ArteDeRobar_TablesContent() {
 //-------------------------------------
 void createNetwork_ArteDeRobar(){
   
+  HashMap<String, Integer> hm_AuxEdges = new HashMap<String, Integer>();
+  
   //For each item of the Edges
+  int counterAuxEdges = 0;
+   for (TableRow row : table_edges.rows()) {  
+     String source_edges = row.getString("Source");
+     String target_edges = row.getString("Target");
+   
+    //exist SOURCE?
+    Boolean foundSource = hm_AuxEdges.containsKey(source_edges);
+        if(foundSource == false){
+          //ifnot --> Add it into HastMap 
+          hm_AuxEdges.put(source_edges, counterAuxEdges);
+          //and Create Node "SOURCE"
+          //TODO
+          
+        }else{ //ifYes
+          //exist TARGET?
+          Boolean foundTarget = hm_AuxEdges.containsKey(target_edges);
+          if(foundTarget == true){
+            //ifYes --> Link both. From TARGET to SOURCE.
+            //TODO
+          }else{
+             //ifnot --> Add TARGET into same HastMap 
+             hm_AuxEdges.put(target_edges, counterAuxEdges);
+             //and Create Node "SOURCE"
+             //TODO
+          }
+                        
+        }
+       
 
-    //Check if exist SOURCE 
-        //ifnot --> Create Node "SOURCE"
-        //ifYes
-            //Check if exist TARGET
-                //ifYes --> Link both. From TARGET to SOURCE.
-                //ifNot --> Create Node "TARGET"
+                
+     counterAuxEdges++;
+   }
 }
