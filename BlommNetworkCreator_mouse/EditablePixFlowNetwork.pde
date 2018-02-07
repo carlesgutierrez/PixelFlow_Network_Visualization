@@ -160,10 +160,10 @@ class EditablePixFlowNetwork {
 
     // interaction stuff
     if (DELETE_SPRINGS) {
-      fill(255, 64);
-      noStroke();
+      noFill();
+      stroke(200);
       strokeWeight(1);
-      ellipse(mouseX, mouseY, DELETE_RADIUS*2, DELETE_RADIUS*2);
+      ellipse(mouseX, mouseY, DELETE_RADIUS, DELETE_RADIUS);
     }
   }
 
