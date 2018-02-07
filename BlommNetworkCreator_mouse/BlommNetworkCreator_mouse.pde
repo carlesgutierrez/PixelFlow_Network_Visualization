@@ -6,7 +6,6 @@
  */
 
 EditablePixFlowNetwork myPixFlowNet;
-
 DwPixelFlow context;
 
 ///////
@@ -111,20 +110,15 @@ public void keyPressed() {
   if (key == 's') {
     bRecordScreen = true;
   }
-
-  //if (keyCode == LEFT)alphaBk += 10; 
-  //if (alphaBk>255) alphaBk = 255;
-  //if (keyCode == RIGHT)alphaBk -= 10; 
-  //if (alphaBk<1) alphaBk = 1;
 }
 //--------------------------------------------
 public void keyReleased() {
   if (key == 's') {
     bRecordScreen = false;
   }
-  if(key == 'h'){
+  if (key == 'h') {
     bGuiHide = ! bGuiHide;
-    if(bGuiHide)cp5.hide();
+    if (bGuiHide)cp5.hide();
     else cp5.show();
   }
 
@@ -132,11 +126,15 @@ public void keyReleased() {
 }
 
 public void mousePressed() {
-  myPixFlowNet.mousePressed();
+  if (cp5.isMouseOver() == false) {
+    myPixFlowNet.mousePressed();
+  }
 }
 
 public void mouseReleased() {
+  if (cp5.isMouseOver() == false) {
   myPixFlowNet.mouseReleased();
+  }
 }
 
 //----------------------------------------

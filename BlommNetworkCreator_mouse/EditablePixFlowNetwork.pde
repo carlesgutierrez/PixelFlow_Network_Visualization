@@ -17,7 +17,7 @@ import com.thomasdiewald.pixelflow.java.softbodydynamics.DwPhysics;//General Phy
 import com.thomasdiewald.pixelflow.java.softbodydynamics.constraint.DwSpringConstraint;//Chain Physics required
 import com.thomasdiewald.pixelflow.java.softbodydynamics.constraint.DwSpringConstraint2D;//Chain Physics required
 import com.thomasdiewald.pixelflow.java.softbodydynamics.particle.DwParticle2D;//Physics required to get and modify exiting nodes
-
+//import com.thomasdiewald.pixelflow.java.softbodydynamics.particle.DwParticle;
 import processing.core.*;
 
 //
@@ -35,6 +35,12 @@ float dampCollision;
 float dampVelocity;
 
 class EditablePixFlowNetwork {
+
+  //Mouse interaction status
+  Boolean bPressedFirstTime = false;
+  float millisAtPressed = 0;
+  float millisInteraction = 0;
+  float radius_ball = 0;
 
   public PApplet papplet;
   public int size_x;
@@ -59,6 +65,9 @@ class EditablePixFlowNetwork {
   color moveNodeColor = color(0, 0, 255);
   Boolean bAddNewNodeChain = false;
   color addNodeColor = color(255, 0, 0);
+  //remove connexions
+  boolean DELETE_SPRINGS = false;
+  float   DELETE_RADIUS  = 20;
 
   ///////////////////////////////////
   //FX Effects and render variables
@@ -148,20 +157,39 @@ class EditablePixFlowNetwork {
         ellipse(mouseX, mouseY, 10, 10);
       }
     }
+
+    // interaction stuff
+    if (DELETE_SPRINGS) {
+      fill(255, 64);
+      noStroke();
+      strokeWeight(1);
+      ellipse(mouseX, mouseY, DELETE_RADIUS*2, DELETE_RADIUS*2);
+    }
+  }
+
+  //--------------------------------
+  public void update() {
+
+    // update physics simulation
+    physics.update(1);
+
+    //update mouse interactions while pressed
+    if (bPressedFirstTime) {
+      millisInteraction = millis()*0.001 - millisAtPressed;
+      //println("millisInteraction ="+str(millisInteraction));
+      //recalc node size
+      radius_ball = map(millisInteraction, 0, 3, 10, 150);
+    }
   }
 
   //---------------------------
   public void draw() {
 
-    // update physics simulation
-    physics.update(1);
+    update();
 
     pg_render.beginDraw();
     pg_render.noStroke();
-    //pg_render.fill(255, 96); //seems to be not necesary
-    //pg_render.rect(0, 0, width, height);
 
-    //pg_render.background(0);
     //Alpha Smoothing Drawings
     if (bBackgroundAlpha) {
       //alphaBk = sliderAlphaBackground;
@@ -252,9 +280,32 @@ class EditablePixFlowNetwork {
     return particle;
   }
 
+  //-----------------------------------------------
+  public ArrayList<DwParticle2D> findParticlesWithinRadius(float mx, float my, float search_radius) {
+    float dd_min_sq = search_radius * search_radius;
+    DwParticle2D[] particles = physics.getParticles();
+    ArrayList<DwParticle2D> list = new ArrayList<DwParticle2D>();
+    for (int i = 0; i < particles.length; i++) {
+      float dx = mx - particles[i].cx;
+      float dy = my - particles[i].cy;
+      float dd_sq =  dx*dx + dy*dy;
+      if (dd_sq < dd_min_sq) {
+        list.add(particles[i]);
+      }
+    }
+    return list;
+  }
+
   //--------------------------------------------
   public void updateMouseInteractions() {
-    if (bMoveMouseParticle) {
+    if (DELETE_SPRINGS) {
+      //ArrayList<DwParticle2D> list = findParticlesWithinRadius(mouseX, mouseY, DELETE_RADIUS);
+      //for (DwParticle2D tmp : list) {
+      //tmp.enableAllSprings(false);
+      //tmp.collision_group = physics.getNewCollisionGroupId();
+      //tmp.rad_collision = tmp.rad;
+      // }
+    } else if (bMoveMouseParticle) {
       if (particle_mouse_pressed != null) {
         float[] mouse = {mouseX, mouseY};
         particle_mouse_pressed.moveTo(mouse, 0.2f);
@@ -314,7 +365,7 @@ class EditablePixFlowNetwork {
     }
     //if (key == 'p') DISPLAY_PARTICLES = !DISPLAY_PARTICLES;
   }
-
+  //--------------------------------------------
   public void mousePressed() {
 
     particle_mouse_released = null;//reset
@@ -326,14 +377,24 @@ class EditablePixFlowNetwork {
         bMoveMouseParticle = true;
       } else if (mouseButton == RIGHT) {
         bAddNewNodeChain = true;
+        //particle_mouse_pressed.enableSprings(true);//do not work as I thought
+      }
+    } else {
+      //Nobody pressed
+      if (mouseButton == RIGHT) { 
+        DELETE_SPRINGS = true;
+      } else if (mouseButton == LEFT) {
+        bPressedFirstTime = true;
+        millisAtPressed = millis()*0.001;
       }
     }
   }
-
+  //--------------------------------------------
   public void mouseReleased() {
 
-    particle_mouse_released = findNearestParticle(mouseX, mouseY, 25, findId_particleMouse_released);
+    bPressedFirstTime = false;
 
+    particle_mouse_released = findNearestParticle(mouseX, mouseY, 25, findId_particleMouse_released);
 
     if (particle_mouse_pressed != null) {
       particle_mouse_pressed.enable(true, true, true); //Reset full status physics
@@ -346,12 +407,27 @@ class EditablePixFlowNetwork {
           addNewItemChain(particle_mouse_pressed, mouseX, mouseY, findId_particleMouse_pressed);
           bAddNewNodeChain = false;
         }
-      } else {
-        //Do others things. If you wanna do something else here
-        //TODO find the right IDs to add here
-         addSpringBetweenParticles(findId_particleMouse_pressed, findId_particleMouse_released);
+      } else { // if item released
+        //Add new spring between pressed and released
+        //particle_mouse_released.enableSprings(true);//do not work as I thought
+        addSpringBetweenParticles(findId_particleMouse_pressed, findId_particleMouse_released);
       }
+    } else {
+      //nobody pressed
+      if (DELETE_SPRINGS) {
+        //remove selected node spring from everyone. //TODO look how to remove just to springs with the right ids
+        if (particle_mouse_released != null)particle_mouse_released.enableAllSprings(false); //enableSprings(false);
+      } else {
+        //nobody released and no Deletion status, allow to add new item
+        if (particle_mouse_released == null) {
+          //Free to add a new it
+          addNewItemCollision(mouseX, mouseY);
+        }
+      }
+
     }
+
+    if (mouseButton == RIGHT ) DELETE_SPRINGS = false;
 
     //reset 
     particle_mouse_released = null;
@@ -378,6 +454,15 @@ class EditablePixFlowNetwork {
     physics.setParticles(particles_Array, particles.size());
   }
 
+  //----------------------------------------------
+  public void addNewItemCollision(float _px, float _py) {
+
+    NodeVA auxParticle = new NodeVA(particles.size(), _px, _py, radius_ball, param_particle, 0, 0); //TODO modify 0,0 to real values... 
+    particles.add(auxParticle);
+
+    DwParticle2D[] particles_Array = particles.toArray(new DwParticle2D[particles.size()]);
+    physics.setParticles(particles_Array, particles.size());
+  }
   //----------------------------------------------
   public void addNewItemChain(DwParticle2D _prevItem, int _px, int _py, vaID _findId) {
 
