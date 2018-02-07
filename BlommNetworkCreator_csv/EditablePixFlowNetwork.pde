@@ -190,7 +190,7 @@ class EditablePixFlowNetwork {
       millisInteraction = millis()*0.001 - millisAtPressed;
       //println("millisInteraction ="+str(millisInteraction));
       //recalc node size
-      radius_ball = map(millisInteraction, 0, 3, 10, 150);
+      radius_ball = map(millisInteraction, 0, 3, 4, 100);
     }
   }
 
@@ -203,14 +203,12 @@ class EditablePixFlowNetwork {
     pg_render.noStroke();
 
     //Alpha Smoothing Drawings
-    if (bBackgroundAlpha) {
-      //alphaBk = sliderAlphaBackground;
-      pg_render.fill(0, 0, 0, slider_AlphaBackground);
-      pg_render.rectMode(CORNER);
-      pg_render.rect(0, 0, width, height);
-    } else pg_render.background(0, 0, 0);
+    pg_render.fill(0, 0, 0, slider_AlphaBackground);
+    pg_render.rectMode(CORNER);
+    pg_render.rect(0, 0, width, height);
 
     drawNetwork();
+    
     pg_render.endDraw();
 
     updateMouseInteractions();    
@@ -456,9 +454,9 @@ class EditablePixFlowNetwork {
       float py = (100 + i * radius * 3)%height;
       float delta_px = px+random(-100, 100);
       float delta_py = py+random(-100, 100);
-      
+
       //particles[i] = new DwParticle2D(i, px, py, radius, param_particle);
-      NodeVA auxNodeVA = new NodeVA(i, delta_px, delta_py, radius, param_particle, 0, 1);
+      NodeVA auxNodeVA = new NodeVA(i, delta_px, delta_py, radius, param_particle);
       particles.add(auxNodeVA);
 
       if (i > 0) DwSpringConstraint2D.addSpring(physics, particles.get(i-1), particles.get(i), param_spring);
@@ -471,7 +469,7 @@ class EditablePixFlowNetwork {
   //----------------------------------------------
   public void addNewItemCollision(float _px, float _py) {
 
-    NodeVA auxParticle = new NodeVA(particles.size(), _px, _py, radius_ball, param_particle, 0, 0); //TODO modify 0,0 to real values... 
+    NodeVA auxParticle = new NodeVA(particles.size(), _px, _py, radius_ball, param_particle);
     particles.add(auxParticle);
 
     DwParticle2D[] particles_Array = particles.toArray(new DwParticle2D[particles.size()]);
@@ -486,8 +484,8 @@ class EditablePixFlowNetwork {
       int id_LastNodeToAdd = _findId.id;//particles.size()-1;
       float radius = random(minNodeSize, maxNodeSize);
       float px = _px+random(-10, 10);
-      float py = _py+random(-10, 10);//100 + int(particles[0].getShape().getVertexY(0));
-      NodeVA auxParticle = new NodeVA(particles.size(), px, py, radius, param_particle, 0, 0); //TODO modify 0,0 to real values... 
+      float py = _py+random(-10, 10);
+      NodeVA auxParticle = new NodeVA(particles.size(), px, py, radius, param_particle);
       particles.add(auxParticle);
 
       //Check Location Clicked

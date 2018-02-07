@@ -8,10 +8,6 @@
 EditablePixFlowNetwork myPixFlowNet;
 DwPixelFlow context;
 
-///////
-//SemiTransParent Background Contend
-Boolean bBackgroundAlpha = true;
-//int alphaBk = 250;
 
 ///////
 int viewport_w = 1280;//2560;//
@@ -19,22 +15,20 @@ int viewport_h = 720;//1440;//
 int viewport_x = 230;
 int viewport_y = 0;
 Boolean bRecordScreen = false;
-Boolean bMouseInteraction = false;
+Boolean bMouseInteraction = true;
 
 ///////
 color defaultColorNode = color(255, 255, 153);
 color defaultColorLines = defaultColorNode;
 float minNodeSize = 5;
 float maxNodeSize = 10;
-//int minResetInitNodes = 10;
-//int maxResetInitNodes = 15;
 Boolean bdrawForcesColor = false;
 
 //////
 //Gui
 import controlP5.*;
 ControlP5 cp5;
-int slider_resetInitNodes = 20;
+int slider_resetInitNodes = 0;
 float slider_BloomMult = 0;
 float slider_BloomRadius = 0;
 int slider_LuminanceExponent = 10;
@@ -59,6 +53,9 @@ public void setup() {
 
   myPixFlowNet = new EditablePixFlowNetwork(this, width, height);
   myPixFlowNet.setup();
+  
+  //CSV
+  load_CSV_NetWork_Tables();
 
   //Gui
   setupGui();
@@ -128,6 +125,9 @@ public void keyReleased() {
     if (bGuiHide)cp5.hide();
     else cp5.show();
   }
+  if(key == 'p'){
+    print_ArteDeRobar_TablesContent(); //Atention --> Only works for ArteDeRobar csv's
+  }
 
   myPixFlowNet.keyReleased();
 }
@@ -155,10 +155,8 @@ void setupGui() {
   int gapYColorPicker = 100;
   int numItemGui = 0;
 
-  cp5.addColorWheel("defaultColorLines", width-gapYColorPicker, initPosY + gapYColorPicker*numItemGui, gapYColorPicker).setRGB(color(128, 0, 255));
-  numItemGui++;
-  cp5.addColorWheel("defaultColorNode", width-gapYColorPicker, initPosY + gapYColorPicker*numItemGui, gapYColorPicker).setRGB(color(128, 0, 255));
-  numItemGui++;
+  cp5.addColorWheel("defaultColorLines", width-gapYColorPicker, initPosY + gapYColorPicker*0, gapYColorPicker).setRGB(color(128, 0, 255));
+  cp5.addColorWheel("defaultColorNode", width-gapYColorPicker, initPosY + gapYColorPicker*1, gapYColorPicker).setRGB(color(128, 0, 255));
 
   // add a horizontal sliders, the value of this slider will be linked
   // to variable 'sliderValue' 
