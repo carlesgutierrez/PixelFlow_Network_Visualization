@@ -221,7 +221,7 @@ class EditablePixFlowNetwork {
   }
 
 
-  //---------------------------------
+  ///////
   //Draw NetWork
   void drawNetwork() {
 

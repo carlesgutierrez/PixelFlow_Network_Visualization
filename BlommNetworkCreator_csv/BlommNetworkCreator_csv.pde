@@ -19,14 +19,15 @@ int viewport_h = 720;//1440;//
 int viewport_x = 230;
 int viewport_y = 0;
 Boolean bRecordScreen = false;
+Boolean bMouseInteraction = false;
 
 ///////
 color defaultColorNode = color(255, 255, 153);
 color defaultColorLines = defaultColorNode;
 float minNodeSize = 5;
 float maxNodeSize = 10;
-int minResetInitNodes = 10;
-int maxResetInitNodes = 15;
+//int minResetInitNodes = 10;
+//int maxResetInitNodes = 15;
 Boolean bdrawForcesColor = false;
 
 //////
@@ -113,6 +114,9 @@ public void keyPressed() {
   if (key == 's') {
     bRecordScreen = true;
   }
+  if (key == 'm') {
+    bMouseInteraction = !bMouseInteraction;
+  }
 }
 //--------------------------------------------
 public void keyReleased() {
@@ -129,13 +133,13 @@ public void keyReleased() {
 }
 
 public void mousePressed() {
-  if (cp5.isMouseOver() == false) {
+  if (cp5.isMouseOver() == false && bMouseInteraction) {
     myPixFlowNet.mousePressed();
   }
 }
 
 public void mouseReleased() {
-  if (cp5.isMouseOver() == false) {
+  if (cp5.isMouseOver() == false && bMouseInteraction) {
     myPixFlowNet.mouseReleased();
   }
 }
@@ -151,8 +155,10 @@ void setupGui() {
   int gapYColorPicker = 100;
   int numItemGui = 0;
 
-  cp5.addColorWheel("defaultColorLines", width-gapYColorPicker, initPosY + gapYColorPicker*0, gapYColorPicker).setRGB(color(128, 0, 255));
-  cp5.addColorWheel("defaultColorNode", width-gapYColorPicker, initPosY + gapYColorPicker*1, gapYColorPicker).setRGB(color(128, 0, 255));
+  cp5.addColorWheel("defaultColorLines", width-gapYColorPicker, initPosY + gapYColorPicker*numItemGui, gapYColorPicker).setRGB(color(128, 0, 255));
+  numItemGui++;
+  cp5.addColorWheel("defaultColorNode", width-gapYColorPicker, initPosY + gapYColorPicker*numItemGui, gapYColorPicker).setRGB(color(128, 0, 255));
+  numItemGui++;
 
   // add a horizontal sliders, the value of this slider will be linked
   // to variable 'sliderValue' 
@@ -166,7 +172,6 @@ void setupGui() {
     .setPosition(initPosX, initPosY + gapY*numItemGui)
     .setRange(0, 2)
     ;
-
   numItemGui++;
 
   cp5.addSlider("slider_BloomRadius")
