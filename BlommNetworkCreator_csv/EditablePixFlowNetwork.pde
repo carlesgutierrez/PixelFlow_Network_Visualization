@@ -40,7 +40,7 @@ class EditablePixFlowNetwork {
   Boolean bPressedFirstTime = false;
   float millisAtPressed = 0;
   float millisInteraction = 0;
-  float radius_ball = 0;
+  float radius_ball = 10;
 
   public PApplet papplet;
   public int size_x;
@@ -331,10 +331,10 @@ class EditablePixFlowNetwork {
   }
 
   //--------------------------------------
-  public void addSpringBetweenParticles(vaID _id0, vaID _id1) {
+  public void addSpringBetweenParticles(int _id0, int _id1) {
 
-    if (particles.size() > _id1.id && particles.size() > _id0.id) { //saved acces to arrayList
-      DwSpringConstraint2D.addSpring(physics, particles.get(_id0.id), particles.get(_id1.id), param_spring);
+    if (particles.size() > _id1 && particles.size() > _id0) { //saved acces to arrayList
+      DwSpringConstraint2D.addSpring(physics, particles.get(_id0), particles.get(_id1), param_spring);
     }
   }
 
@@ -414,12 +414,12 @@ class EditablePixFlowNetwork {
 
       if (particle_mouse_released == null) { // There were NOT another node
         if (mouseButton == RIGHT) { // and Right Mouse Interaction
-          addNewItemChain(particle_mouse_pressed, mouseX, mouseY, findId_particleMouse_pressed);
+          addNewItemChain(mouseX, mouseY, findId_particleMouse_pressed.id);
         }
       } else { // if item released
         //Add new spring between pressed and released
         //particle_mouse_released.enableSprings(true);//do not work as I thought
-        addSpringBetweenParticles(findId_particleMouse_pressed, findId_particleMouse_released);
+        addSpringBetweenParticles(findId_particleMouse_pressed.id, findId_particleMouse_released.id);
       }
     } else {
       //nobody pressed
@@ -467,21 +467,22 @@ class EditablePixFlowNetwork {
   }
 
   //----------------------------------------------
-  public void addNewItemCollision(float _px, float _py) {
+  public DwParticle2D addNewItemCollision(float _px, float _py) {
 
     NodeVA auxParticle = new NodeVA(particles.size(), _px, _py, radius_ball, param_particle);
     particles.add(auxParticle);
 
     DwParticle2D[] particles_Array = particles.toArray(new DwParticle2D[particles.size()]);
     physics.setParticles(particles_Array, particles.size());
+    
+    return particles_Array[particles_Array.length-1];
   }
   //----------------------------------------------
-  public void addNewItemChain(DwParticle2D _prevItem, int _px, int _py, vaID _findId) {
+  public void addNewItemChain(int _px, int _py, int _findId) {
 
-
-    if (particle_mouse_pressed != null) {
+    //if (particle_mouse_pressed != null) {
       //Add one circle to this particle
-      int id_LastNodeToAdd = _findId.id;//particles.size()-1;
+      int id_LastNodeToAdd = _findId;//particles.size()-1;
       float radius = random(minNodeSize, maxNodeSize);
       float px = _px+random(-10, 10);
       float py = _py+random(-10, 10);
@@ -493,7 +494,7 @@ class EditablePixFlowNetwork {
 
       //Add to World
       DwSpringConstraint2D.addSpring(physics, particles.get(id_LastNodeToAdd), particles.get(particles.size()-1), param_spring);
-    }
+    //}
 
     DwParticle2D[] particles_Array = particles.toArray(new DwParticle2D[particles.size()]);
     physics.setParticles(particles_Array, particles.size());

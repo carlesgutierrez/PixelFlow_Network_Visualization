@@ -7,7 +7,7 @@ Table table_edges;
 
 // Note the HashMap's "key" is a String and "value" is an Integer
 HashMap<String, Integer> hm_targets = new HashMap<String, Integer>();
-
+HashMap<String, Integer> hm_NetworkRel = new HashMap<String, Integer>();
 
 //------------------------------------
 void setupHashTables() {
@@ -44,15 +44,14 @@ void print_ArteDeRobar_HastMap() {
     print(me.getKey() + " is ");
     println(me.getValue());
   }
-  
+
   int val = hm_targets.get("VB1D4mdJri0");
   print("Tests\n Looking for VB1D4mdJri0 -->");
   println(val);
-  
+
   Boolean found = hm_targets.containsKey("VB1D4mdJri0");
   print("exist VB1D4mdJri0 ? -->");
   println(found);
-  
 }
 
 //------------------------------------
@@ -83,58 +82,49 @@ void print_ArteDeRobar_TablesContent() {
 }
 
 //-------------------------------------
-void createNetwork_ArteDeRobar(){
+void createNetwork_ArteDeRobar() {
   myPixFlowNet.reset();
-  
-  HashMap<String, Integer> hm_AuxEdges = new HashMap<String, Integer>();
-  
+  hm_NetworkRel.clear();
+
   //For each item of the Edges
   int counterAuxEdges = 0;
-   for (TableRow row : table_edges.rows()) {  
-     String source_edges = row.getString("Source");
-     String target_edges = row.getString("Target");
-   
+  for (TableRow row : table_edges.rows()) {  
+    String source_edges = row.getString("Source");
+    String target_edges = row.getString("Target");
+
     //exist SOURCE?
-    Boolean foundSource = hm_AuxEdges.containsKey(source_edges);
-    Boolean foundTarget = hm_AuxEdges.containsKey(target_edges);
+    Boolean foundSource = hm_NetworkRel.containsKey(source_edges);
+    Boolean foundTarget = hm_NetworkRel.containsKey(target_edges);
+    //Find the Target and Source in the hasmap, this order is equivalent to particles
+    int idParticleTarget = 0;
+    if (foundTarget)idParticleTarget = hm_targets.get(target_edges);
+    int idParticleSource = 0;
+    if (foundSource)idParticleSource = hm_targets.get(source_edges);
 
-        if(foundSource == false){
-          //Add it into HastMap 
-          hm_AuxEdges.put(source_edges, counterAuxEdges);
-          if(foundTarget == false){
-            //There were nobody Create Node "SOURCE" and Link them
-            myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));
-            myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));
-            //myPixFlowNet.addNewItemChain(,,,)
-          }
-          else{
-            //just Create Node "SOURCE"
-            myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));
-            //TODO link it to the TARGET that already exist
-          }
-        }else{ //ifYes
-          //exist TARGET?
-          if(foundTarget == true){
-            //ifYes --> Link both. From TARGET to SOURCE.
-              //Find Id Targe and Id Source from physics system
-            //?
-            //myPixFlowNet.addSpringBetweenParticles(vaID _id0, vaID _id1)
-          }else{
-             //ifnot --> Add TARGET into same HastMap 
-             hm_AuxEdges.put(target_edges, counterAuxEdges);
-             //and Create Node "TARGET"
-             //TODO
-             //?
-             myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));
-             //And Linkit to SOURCE
-             //addSpringBetweenParticles(vaID _id0, vaID _id1)
+    if (foundSource == false) { //Found Source -> Not --> Add source (HashMap & particles)
+      hm_NetworkRel.put(source_edges, counterAuxEdges); 
+      counterAuxEdges++;
+      idParticleSource = hm_targets.get(source_edges);
+      myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));//Create new Source
 
-          }
-                        
-        }
-       
-
-                
-     counterAuxEdges++;
-   }
+      if (foundTarget == false) {//Found Target -> Not --> Add target (HashMap & particles)
+        hm_NetworkRel.put(target_edges, counterAuxEdges);
+        counterAuxEdges++;
+        idParticleTarget = hm_targets.get(source_edges);
+        myPixFlowNet.addNewItemChain((int)random(0, width), (int)random(0, height), idParticleTarget); //particles.size()-1);//Create Item and linked it auto
+      } else { //Found Target -> Yes ---> link TARGET & SOURCE
+        myPixFlowNet.addSpringBetweenParticles(idParticleTarget, idParticleSource);
+      }
+    } else { //Found Source -> Yes
+      if (foundTarget == true) { //Source Yes & Found Target -> Yes ---> link TARGET & SOURCE
+        myPixFlowNet.addSpringBetweenParticles(idParticleTarget, idParticleSource);//link TARGET to created SOURCE
+      } else {
+        //Source Yes & Found Target -> Not --> Add target (HashMap & particles)
+        hm_NetworkRel.put(target_edges, counterAuxEdges);
+        counterAuxEdges++;
+        idParticleTarget = hm_targets.get(source_edges);
+        myPixFlowNet.addNewItemChain((int)random(0, width), (int)random(0, height), idParticleTarget);//Create Item and linked it auto
+      }
+    }
+  }
 }
