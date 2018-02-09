@@ -40,7 +40,7 @@ class EditablePixFlowNetwork {
   Boolean bPressedFirstTime = false;
   float millisAtPressed = 0;
   float millisInteraction = 0;
-  int radius_ball = 10;
+  int slider_radius_ball = 10;
 
   public PApplet papplet;
   public int size_x;
@@ -175,7 +175,7 @@ class EditablePixFlowNetwork {
       noFill();
       stroke(addNodeColor);
       strokeWeight(1);
-      ellipse(mouseX, mouseY, radius_ball, radius_ball);
+      ellipse(mouseX, mouseY, slider_radius_ball, slider_radius_ball);
     }
   }
 
@@ -190,7 +190,7 @@ class EditablePixFlowNetwork {
       millisInteraction = millis()*0.001 - millisAtPressed;
       //println("millisInteraction ="+str(millisInteraction));
       //recalc node size
-      radius_ball = (int)map(millisInteraction, 0, 3, 4, 100);
+      slider_radius_ball = (int)map(millisInteraction, 0, 3, 4, 100);
     }
   }
 
@@ -414,7 +414,7 @@ class EditablePixFlowNetwork {
 
       if (particle_mouse_released == null) { // There were NOT another node
         if (mouseButton == RIGHT) { // and Right Mouse Interaction
-          addNewItemChain(mouseX, mouseY, findId_particleMouse_pressed.id);
+          addNewItemChain(mouseX, mouseY, findId_particleMouse_pressed.id, slider_radius_ball);
         }
       } else { // if item released
         //Add new spring between pressed and released
@@ -430,7 +430,7 @@ class EditablePixFlowNetwork {
         //nobody released and no Deletion status, allow to add new item
         if (particle_mouse_released == null) {
           //Free to add a new it
-          addNewItemCollision(mouseX, mouseY, radius_ball);
+          addNewItemCollision(mouseX, mouseY, slider_radius_ball);
         }
       }
     }
@@ -449,7 +449,7 @@ class EditablePixFlowNetwork {
     int numRandomParticles = int(slider_resetInitNodes);
     // create particles + chain them together
     for (int i = 0; i < numRandomParticles; i++) {
-      float radius = random(minNodeSize, maxNodeSize);
+      float radius = random(slider_minNodeSize, slider_maxNodeSize);
       float px = size_x/2;
       float py = (100 + i * radius * 3)%height;
       float delta_px = px+random(-100, 100);
@@ -478,12 +478,12 @@ class EditablePixFlowNetwork {
     return particles_Array[particles_Array.length-1];
   }
   //----------------------------------------------
-  public void addNewItemChain(int _px, int _py, int _findId) {
+  public void addNewItemChain(float _px, float _py, int _findId, int _radius_ball) {
 
     //if (particle_mouse_pressed != null) {
       //Add one circle to this particle
       int id_LastNodeToAdd = _findId;//particles.size()-1;
-      float radius = random(minNodeSize, maxNodeSize);
+      float radius = _radius_ball;
       float px = _px+random(-10, 10);
       float py = _py+random(-10, 10);
       NodeVA auxParticle = new NodeVA(particles.size(), px, py, radius, param_particle);

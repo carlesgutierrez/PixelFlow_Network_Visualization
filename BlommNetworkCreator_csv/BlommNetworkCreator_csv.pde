@@ -153,31 +153,43 @@ void setupGui() {
   cp5 = new ControlP5(this);
   int initPosX = 10;
   int initPosY = 10;
-  int gapY = 20; 
+  int gapY = 30; 
   int gapYColorPicker = 100;
   int numItemGui = 0;
 
   cp5.addColorWheel("defaultColorLines", width-gapYColorPicker, initPosY + gapYColorPicker*0, gapYColorPicker).setRGB(color(128, 0, 255));
   cp5.addColorWheel("defaultColorNode", width-gapYColorPicker, initPosY + gapYColorPicker*1, gapYColorPicker).setRGB(color(128, 0, 255));
 
-  // add a horizontal sliders, the value of this slider will be linked
-  // to variable 'sliderValue' 
+  cp5.addSpacer("Node Properties")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    ;
+  numItemGui++;
+  
+  //cp5.addTextfield("Table Propertie Name")
+  //  .setPosition(initPosX, initPosY + gapY*numItemGui - 20)
+  //  ;
+  //numItemGui++;
+
+  //cp5.addSlider("slider_radius_ball")
+  //  .setPosition(initPosX, initPosY + gapY*numItemGui)
+  //  .setRange(2, 200)
+  //  ;
+  //numItemGui++;
 
   cp5.addSlider("slider_minNodeSize")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
-    .setRange(0, 200)
+    .setRange(2, 100)
     ;
   numItemGui++;
 
   cp5.addSlider("slider_maxNodeSize")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
-    .setRange(0, 200)
+    .setRange(2, 200)
     ;
   numItemGui++;
 
-  cp5.addSlider("slider_resetInitNodes")
+  cp5.addSpacer("Enjoy Bloom Effects")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
-    .setRange(0, 200)
     ;
   numItemGui++;
 
@@ -208,6 +220,17 @@ void setupGui() {
   cp5.addSlider("slider_LuminanceExponent")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
     .setRange(0, 30)
+    ;
+  numItemGui++;
+
+  cp5.addSpacer("Set Radom Nodes")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    ;
+  numItemGui++;
+
+  cp5.addSlider("slider_resetInitNodes")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    .setRange(0, 200)
     ;
   numItemGui++;
 }

@@ -80,6 +80,15 @@ void print_ArteDeRobar_TablesContent() {
     println("Edges id["+id_edges+"]: Source["+source_edges+"] -> target["+target_edges+"] // type ["+type_edges+"]");
   }
 }
+//--------------------------------------
+int getNodeSizeRelatedToDataTable(int idTable, String parameterName, int _MinRefSize, int _MaxRefSize) {
+  //Get a desired value from Targets and map it between min, max radius
+  TableRow rowDesiredData = table_targets.getRow(idTable);
+  int auxDesiredData = rowDesiredData.getInt(parameterName);
+  int mapedNodeSize = (int)map((float)auxDesiredData, (float)_MinRefSize, (float)_MaxRefSize, slider_minNodeSize, slider_maxNodeSize);
+
+  return mapedNodeSize;
+}
 
 //-------------------------------------
 void createNetwork_ArteDeRobar(String _nodeNameParameter, int _nodeSizeParameterMin, int _nodeSizeParameterMax) {
@@ -105,17 +114,17 @@ void createNetwork_ArteDeRobar(String _nodeNameParameter, int _nodeSizeParameter
       hm_NetworkRel.put(source_edges, counterAuxEdges); 
       counterAuxEdges++;
       idParticleSource = hm_targets.get(source_edges);
-      //Get a desired value from Targets and map it between min, max radius
-      TableRow rowDesiredData = table_targets.getRow(idParticleSource);
-      int auxDesiredData = rowDesiredData.getInt(_nodeNameParameter);
-      float mapedNodeSize = map((float)auxDesiredData, (float)_nodeSizeParameterMin, (float)_nodeSizeParameterMax, minNodeSize, maxNodeSize);
-      myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height),(int)mapedNodeSize);//Create new Source
+      //Checking Table Rel Data for Source Node Size
+      int auxSizeNodeSource = getNodeSizeRelatedToDataTable(idParticleSource, _nodeNameParameter, _nodeSizeParameterMin, _nodeSizeParameterMax);
+      myPixFlowNet.addNewItemCollision(random(0, width), random(0, height), auxSizeNodeSource);//Create new Source
 
       if (foundTarget == false) {//Found Target -> Not --> Add target (HashMap & particles)
         hm_NetworkRel.put(target_edges, counterAuxEdges);
         counterAuxEdges++;
         idParticleTarget = hm_targets.get(source_edges);
-        myPixFlowNet.addNewItemChain((int)random(0, width), (int)random(0, height), idParticleTarget); //particles.size()-1);//Create Item and linked it auto
+        //Checking Table Rel Data for Target Node Size
+        int auxSizeTargetNode = getNodeSizeRelatedToDataTable(idParticleTarget, _nodeNameParameter, _nodeSizeParameterMin, _nodeSizeParameterMax);
+        myPixFlowNet.addNewItemChain(random(0, width), random(0, height), idParticleTarget, auxSizeTargetNode);
       } else { //Found Target -> Yes ---> link TARGET & SOURCE
         myPixFlowNet.addSpringBetweenParticles(idParticleTarget, idParticleSource);
       }
@@ -127,7 +136,10 @@ void createNetwork_ArteDeRobar(String _nodeNameParameter, int _nodeSizeParameter
         hm_NetworkRel.put(target_edges, counterAuxEdges);
         counterAuxEdges++;
         idParticleTarget = hm_targets.get(source_edges);
-        myPixFlowNet.addNewItemChain((int)random(0, width), (int)random(0, height), idParticleTarget);//Create Item and linked it auto
+        //Checking Table Rel Data for Target Node Size
+        int auxSizeTargetNode = getNodeSizeRelatedToDataTable(idParticleTarget, _nodeNameParameter, _nodeSizeParameterMin, _nodeSizeParameterMax);
+        PVector nodePos = new PVector((int)random(0, width), (int)random(0, height));
+        myPixFlowNet.addNewItemChain(nodePos.x, nodePos.y, idParticleTarget, auxSizeTargetNode);//Create Item and linked it auto
       }
     }
   }
