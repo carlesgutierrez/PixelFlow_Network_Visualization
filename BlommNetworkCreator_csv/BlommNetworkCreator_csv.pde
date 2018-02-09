@@ -20,8 +20,8 @@ Boolean bMouseInteraction = true;
 ///////
 color defaultColorNode = color(255, 255, 153);
 color defaultColorLines = defaultColorNode;
-float minNodeSize = 5;
-float maxNodeSize = 10;
+float slider_minNodeSize = 5;
+float slider_maxNodeSize = 10;
 Boolean bdrawForcesColor = false;
 
 //////
@@ -53,7 +53,7 @@ public void setup() {
 
   myPixFlowNet = new EditablePixFlowNetwork(this, width, height);
   myPixFlowNet.setup();
-  
+
   //CSV
   load_CSV_NetWork_Tables();
 
@@ -125,9 +125,9 @@ public void keyReleased() {
     if (bGuiHide)cp5.hide();
     else cp5.show();
   }
-  if(key == ' '){
+  if (key == ' ') {
     print_ArteDeRobar_HastMap();
-    createNetwork_ArteDeRobar();
+    createNetwork_ArteDeRobar("betweenesscentrality", 0, 300);
     //print_ArteDeRobar_TablesContent(); //Atention --> Only works for ArteDeRobar csv's
   }
 
@@ -162,6 +162,19 @@ void setupGui() {
 
   // add a horizontal sliders, the value of this slider will be linked
   // to variable 'sliderValue' 
+
+  cp5.addSlider("slider_minNodeSize")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    .setRange(0, 200)
+    ;
+  numItemGui++;
+
+  cp5.addSlider("slider_maxNodeSize")
+    .setPosition(initPosX, initPosY + gapY*numItemGui)
+    .setRange(0, 200)
+    ;
+  numItemGui++;
+
   cp5.addSlider("slider_resetInitNodes")
     .setPosition(initPosX, initPosY + gapY*numItemGui)
     .setRange(0, 200)

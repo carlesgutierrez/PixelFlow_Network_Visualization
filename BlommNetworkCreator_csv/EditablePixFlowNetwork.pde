@@ -40,7 +40,7 @@ class EditablePixFlowNetwork {
   Boolean bPressedFirstTime = false;
   float millisAtPressed = 0;
   float millisInteraction = 0;
-  float radius_ball = 10;
+  int radius_ball = 10;
 
   public PApplet papplet;
   public int size_x;
@@ -190,7 +190,7 @@ class EditablePixFlowNetwork {
       millisInteraction = millis()*0.001 - millisAtPressed;
       //println("millisInteraction ="+str(millisInteraction));
       //recalc node size
-      radius_ball = map(millisInteraction, 0, 3, 4, 100);
+      radius_ball = (int)map(millisInteraction, 0, 3, 4, 100);
     }
   }
 
@@ -430,7 +430,7 @@ class EditablePixFlowNetwork {
         //nobody released and no Deletion status, allow to add new item
         if (particle_mouse_released == null) {
           //Free to add a new it
-          addNewItemCollision(mouseX, mouseY);
+          addNewItemCollision(mouseX, mouseY, radius_ball);
         }
       }
     }
@@ -467,9 +467,9 @@ class EditablePixFlowNetwork {
   }
 
   //----------------------------------------------
-  public DwParticle2D addNewItemCollision(float _px, float _py) {
+  public DwParticle2D addNewItemCollision(float _px, float _py, int _radius_ball) {
 
-    NodeVA auxParticle = new NodeVA(particles.size(), _px, _py, radius_ball, param_particle);
+    NodeVA auxParticle = new NodeVA(particles.size(), _px, _py, _radius_ball, param_particle);
     particles.add(auxParticle);
 
     DwParticle2D[] particles_Array = particles.toArray(new DwParticle2D[particles.size()]);

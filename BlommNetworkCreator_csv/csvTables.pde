@@ -12,7 +12,7 @@ HashMap<String, Integer> hm_NetworkRel = new HashMap<String, Integer>();
 //------------------------------------
 void setupHashTables() {
 
-  //TARGETS
+  //TARGETS will contain all the desired info about each node.
   int auxCounterTargets = 0;
   for (TableRow row : table_targets.rows()) {
     String id_targets = row.getString("Id"); //Source or 
@@ -82,7 +82,7 @@ void print_ArteDeRobar_TablesContent() {
 }
 
 //-------------------------------------
-void createNetwork_ArteDeRobar() {
+void createNetwork_ArteDeRobar(String _nodeNameParameter, int _nodeSizeParameterMin, int _nodeSizeParameterMax) {
   myPixFlowNet.reset();
   hm_NetworkRel.clear();
 
@@ -105,7 +105,11 @@ void createNetwork_ArteDeRobar() {
       hm_NetworkRel.put(source_edges, counterAuxEdges); 
       counterAuxEdges++;
       idParticleSource = hm_targets.get(source_edges);
-      myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height));//Create new Source
+      //Get a desired value from Targets and map it between min, max radius
+      TableRow rowDesiredData = table_targets.getRow(idParticleSource);
+      int auxDesiredData = rowDesiredData.getInt(_nodeNameParameter);
+      float mapedNodeSize = map((float)auxDesiredData, (float)_nodeSizeParameterMin, (float)_nodeSizeParameterMax, minNodeSize, maxNodeSize);
+      myPixFlowNet.addNewItemCollision((int)random(0, width), (int)random(0, height),(int)mapedNodeSize);//Create new Source
 
       if (foundTarget == false) {//Found Target -> Not --> Add target (HashMap & particles)
         hm_NetworkRel.put(target_edges, counterAuxEdges);
